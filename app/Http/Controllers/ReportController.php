@@ -25,7 +25,11 @@ class ReportController extends Controller
         $items = $query->orderBy('name')->paginate(20)->withQueryString();
         $categories = Category::orderBy('name')->get();
 
-        return view('reports.stock', compact('items', 'categories'));
+        $totalValuationPurchase = Item::selectRaw('SUM(current_stock * purchase_price) as total')->value('total') ?? 0;
+        $totalValuationSelling = Item::selectRaw('SUM(current_stock * selling_price) as total')->value('total') ?? 0;
+        $lowStockCount = Item::whereColumn('current_stock', '<=', 'min_stock')->count();
+
+        return view('reports.stock', compact('items', 'categories', 'totalValuationPurchase', 'totalValuationSelling', 'lowStockCount'));
     }
 
     public function exportStockCsv(Request $request): StreamedResponse
@@ -93,9 +97,17 @@ class ReportController extends Controller
             $query->whereDate('date', '<=', $request->date_to);
         }
 
+        // Clone query for stats calculations
+        $statsQuery = clone $query;
+
         $movements = $query->latest('date')->latest('id')->paginate(20)->withQueryString();
 
-        return view('reports.transactions', compact('movements'));
+        $totalIncome = (clone $statsQuery)->where('type', 'in')->sum('total_amount');
+        $totalExpense = (clone $statsQuery)->where('type', 'out')->sum('total_amount');
+        $totalInQty = (clone $statsQuery)->where('type', 'in')->sum('total_quantity');
+        $totalOutQty = (clone $statsQuery)->where('type', 'out')->sum('total_quantity');
+
+        return view('reports.transactions', compact('movements', 'totalIncome', 'totalExpense', 'totalInQty', 'totalOutQty'));
     }
 
     public function exportTransactionsCsv(Request $request): StreamedResponse

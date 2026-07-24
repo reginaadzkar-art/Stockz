@@ -3,161 +3,615 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard') - Stockz</title>
+    <title>@yield('title', 'Dashboard') - Stockz Command Engine</title>
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
     <style>
+        :root {
+            --bg-canvas: #f4f6f9;
+            --surface-white: #ffffff;
+            --surface-hover: #f8fafc;
+            --brand-emerald: #0f543f;
+            --brand-emerald-light: #10b981;
+            --brand-emerald-glow: rgba(16, 185, 129, 0.15);
+            --royal-violet: #6d28d9;
+            --royal-violet-glow: rgba(109, 40, 217, 0.12);
+            --coral-alert: #dc2626;
+            --coral-glow: rgba(220, 38, 38, 0.12);
+            --amber-warn: #d97706;
+            --text-heading: #0f172a;
+            --text-body: #334155;
+            --text-muted: #64748b;
+            --border-light: #e2e8f0;
+            --border-light-subtle: #f1f5f9;
+            --sidebar-width: 270px;
+        }
+
         body {
-            background-color: #f8f9fa;
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-canvas);
+            color: var(--text-body);
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        .navbar-brand {
-            font-weight: 700;
-            letter-spacing: 0.5px;
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6, .fw-heading {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-heading);
+            letter-spacing: -0.02em;
         }
-        .card-stat {
-            border: none;
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Layout Structure */
+        .app-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styling (Donezo Light Style) */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--surface-white);
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1040;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-light-subtle);
+        }
+
+        .brand-logo-icon {
+            width: 40px;
+            height: 40px;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
+            background: linear-gradient(135deg, var(--brand-emerald), #166534);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 1.35rem;
+            box-shadow: 0 4px 12px rgba(15, 84, 63, 0.2);
         }
-        .card-stat:hover {
-            transform: translateY(-2px);
+
+        .brand-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-heading);
+            margin: 0;
+            line-height: 1.1;
         }
-        .role-badge {
-            font-size: 0.75rem;
+
+        .brand-subtitle {
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 4px 8px;
+            letter-spacing: 1px;
+            color: var(--brand-emerald);
+            font-weight: 700;
+        }
+
+        .sidebar-menu {
+            padding: 1.25rem 1rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .menu-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            padding: 0.75rem 0.75rem 0.35rem;
+        }
+
+        .nav-link-custom {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.7rem 1rem;
+            color: var(--text-body);
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-link-custom i {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            transition: color 0.2s ease;
+        }
+
+        .nav-link-custom:hover {
+            color: var(--text-heading);
+            background: var(--surface-hover);
+        }
+
+        .nav-link-custom.active {
+            background: rgba(15, 84, 63, 0.08);
+            color: var(--brand-emerald);
+            font-weight: 700;
+            border: 1px solid rgba(15, 84, 63, 0.2);
+        }
+
+        .nav-link-custom.active i {
+            color: var(--brand-emerald);
+        }
+
+        .sidebar-user {
+            padding: 1.25rem;
+            border-top: 1px solid var(--border-light);
+            background: var(--surface-hover);
+        }
+
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--surface-white);
+            padding: 0.75rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+        }
+
+        .avatar-box {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--royal-violet), #4c1d95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 10px rgba(109, 40, 217, 0.2);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        /* Top Bar Header */
+        .topbar {
+            height: 70px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+        }
+
+        .search-trigger-btn {
+            background: var(--bg-canvas);
+            border: 1px solid var(--border-light);
+            color: var(--text-muted);
+            padding: 0.55rem 1.1rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 320px;
+        }
+
+        .search-trigger-btn:hover {
+            border-color: #cbd5e1;
+            color: var(--text-heading);
+            background: #e2e8f0;
+        }
+
+        .shortcut-chip {
+            margin-left: auto;
+            background: var(--surface-white);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+        }
+
+        /* Light Cards & Glass Elements */
+        .glass-card {
+            background: var(--surface-white);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+        }
+
+        .glass-card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-light-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Status & Role Badges */
+        .role-pill {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 3px 9px;
             border-radius: 20px;
         }
+
+        .role-admin {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--coral-alert);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+        }
+
+        .role-staff {
+            background: rgba(15, 84, 63, 0.1);
+            color: var(--brand-emerald);
+            border: 1px solid rgba(15, 84, 63, 0.2);
+        }
+
+        .role-owner {
+            background: rgba(109, 40, 217, 0.1);
+            color: var(--royal-violet);
+            border: 1px solid rgba(109, 40, 217, 0.2);
+        }
+
+        .badge-emerald {
+            background: rgba(16, 185, 129, 0.12);
+            color: #065f46;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-weight: 600;
+        }
+
+        .badge-coral {
+            background: rgba(220, 38, 38, 0.12);
+            color: #991b1b;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-weight: 600;
+        }
+
+        /* Custom Table Styling (Light) */
+        .table-custom {
+            color: var(--text-body);
+            margin: 0;
+        }
+
+        .table-custom thead th {
+            background: #f8fafc;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-light);
+            padding: 0.9rem 1.25rem;
+        }
+
+        .table-custom tbody td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-light-subtle);
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+
+        .table-custom tbody tr:hover td {
+            background: #f8fafc;
+        }
+
+        /* Form Controls Light */
+        .form-control-custom, .form-select-custom {
+            background: var(--surface-white);
+            border: 1px solid var(--border-light);
+            color: var(--text-heading);
+            border-radius: 10px;
+            padding: 0.65rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control-custom:focus, .form-select-custom:focus {
+            background: var(--surface-white);
+            border-color: var(--brand-emerald);
+            color: var(--text-heading);
+            box-shadow: 0 0 0 3px var(--brand-emerald-glow);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-canvas);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Mobile Sidebar Overlay */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .search-trigger-btn {
+                width: 180px;
+            }
+        }
     </style>
+    @stack('styles')
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand text-warning" href="{{ route('dashboard') }}">
-                <i class="bi bi-box-seam-fill me-2"></i>Stockz
+
+<div class="app-wrapper">
+    <!-- Sidebar Navigation (Donezo Light Style) -->
+    <aside class="sidebar" id="appSidebar">
+        <div class="sidebar-brand">
+            <div class="brand-logo-icon">
+                <i class="bi bi-box-seam-fill"></i>
+            </div>
+            <div>
+                <div class="brand-title">Stockz</div>
+                <div class="brand-subtitle">Analytics & Inventory</div>
+            </div>
+        </div>
+
+        <div class="sidebar-menu">
+            <div class="menu-label">Navigasi Utama</div>
+
+            <a href="{{ route('dashboard') }}" class="nav-link-custom {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Dashboard</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                            <i class="bi bi-speedometer2 me-1"></i> Dashboard
-                        </a>
-                    </li>
 
-                    @auth
-                        @if(Auth::user()->isAdmin() || Auth::user()->isStaff())
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle {{ request()->is('items*') || request()->is('categories*') || request()->is('suppliers*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-database me-1"></i> Data Master
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ route('items.index') }}"><i class="bi bi-box me-2"></i>Data Barang</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('categories.index') }}"><i class="bi bi-tags me-2"></i>Kategori Barang</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('suppliers.index') }}"><i class="bi bi-truck me-2"></i>Supplier</a></li>
-                                </ul>
-                            </li>
-                        @endif
+            @auth
+                @if(Auth::user()->isAdmin() || Auth::user()->isStaff())
+                    <div class="menu-label mt-3">Data Master</div>
 
-                        @if(Auth::user()->isAdmin() || Auth::user()->isStaff())
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle {{ request()->is('stock-movements*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-arrow-left-right me-1"></i> Transaksi Stok
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ route('stock-movements.in.create') }}"><i class="bi bi-arrow-down-left-circle text-success me-2"></i>Input Barang Masuk</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('stock-movements.out.create') }}"><i class="bi bi-arrow-up-right-circle text-danger me-2"></i>Input Barang Keluar</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="{{ route('stock-movements.index') }}"><i class="bi bi-list-ul me-2"></i>Semua Transaksi</a></li>
-                                </ul>
-                            </li>
-                        @endif
+                    <a href="{{ route('items.index') }}" class="nav-link-custom {{ request()->is('items*') ? 'active' : '' }}">
+                        <i class="bi bi-box"></i>
+                        <span>Data Barang</span>
+                    </a>
+                    <a href="{{ route('categories.index') }}" class="nav-link-custom {{ request()->is('categories*') ? 'active' : '' }}">
+                        <i class="bi bi-tags"></i>
+                        <span>Kategori Barang</span>
+                    </a>
+                    <a href="{{ route('suppliers.index') }}" class="nav-link-custom {{ request()->is('suppliers*') ? 'active' : '' }}">
+                        <i class="bi bi-truck"></i>
+                        <span>Supplier</span>
+                    </a>
+                @endif
 
-                        @if(Auth::user()->isAdmin() || Auth::user()->isOwner())
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle {{ request()->is('reports*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-file-earmark-bar-graph me-1"></i> Laporan
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ route('reports.stock') }}"><i class="bi bi-card-checklist me-2"></i>Laporan Stok Barang</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('reports.transactions') }}"><i class="bi bi-clock-history me-2"></i>Histori Transaksi</a></li>
-                                </ul>
-                            </li>
-                        @endif
+                @if(Auth::user()->isAdmin() || Auth::user()->isStaff())
+                    <div class="menu-label mt-3">Transaksi Stok</div>
 
+                    <a href="{{ route('stock-movements.in.create') }}" class="nav-link-custom {{ request()->routeIs('stock-movements.in.create') ? 'active' : '' }}">
+                        <i class="bi bi-arrow-down-left-circle text-success"></i>
+                        <span>Barang Masuk</span>
+                    </a>
+                    <a href="{{ route('stock-movements.out.create') }}" class="nav-link-custom {{ request()->routeIs('stock-movements.out.create') ? 'active' : '' }}">
+                        <i class="bi bi-arrow-up-right-circle text-danger"></i>
+                        <span>Barang Keluar</span>
+                    </a>
+                    <a href="{{ route('stock-movements.index') }}" class="nav-link-custom {{ request()->routeIs('stock-movements.index') ? 'active' : '' }}">
+                        <i class="bi bi-list-ul"></i>
+                        <span>Semua Transaksi</span>
+                    </a>
+                @endif
+
+                @if(Auth::user()->isAdmin() || Auth::user()->isOwner())
+                    <div class="menu-label mt-3">Laporan & Finance</div>
+
+                    <a href="{{ route('reports.stock') }}" class="nav-link-custom {{ request()->routeIs('reports.stock') ? 'active' : '' }}">
+                        <i class="bi bi-card-checklist"></i>
+                        <span>Laporan Stok & Asset</span>
+                    </a>
+                    <a href="{{ route('reports.transactions') }}" class="nav-link-custom {{ request()->routeIs('reports.transactions') ? 'active' : '' }}">
+                        <i class="bi bi-cash-stack"></i>
+                        <span>Cashflow & Histori</span>
+                    </a>
+                @endif
+
+                @if(Auth::user()->isAdmin())
+                    <div class="menu-label mt-3">Pengaturan System</div>
+
+                    <a href="{{ route('users.index') }}" class="nav-link-custom {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                        <i class="bi bi-shield-lock"></i>
+                        <span>Kelola User</span>
+                    </a>
+                @endif
+            @endauth
+        </div>
+
+        @auth
+            <div class="sidebar-user">
+                <div class="user-card">
+                    <div class="avatar-box">
+                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    </div>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="fw-semibold text-truncate text-dark font-size-14">{{ Auth::user()->name }}</div>
                         @if(Auth::user()->isAdmin())
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
-                                    <i class="bi bi-people me-1"></i> Kelola User
-                                </a>
-                            </li>
+                            <span class="role-pill role-admin">Admin</span>
+                        @elseif(Auth::user()->isStaff())
+                            <span class="role-pill role-staff">Staff</span>
+                        @elseif(Auth::user()->isOwner())
+                            <span class="role-pill role-owner">Owner</span>
                         @endif
-                    @endauth
-                </ul>
+                    </div>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-link text-muted p-1" title="Logout">
+                            <i class="bi bi-box-arrow-right fs-5"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        @endauth
+    </aside>
+
+    <!-- Main Section -->
+    <div class="main-content">
+        <!-- Top Bar Header -->
+        <header class="topbar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-link text-dark p-0 d-lg-none" type="button" onclick="document.getElementById('appSidebar').classList.toggle('show')">
+                    <i class="bi bi-list fs-2"></i>
+                </button>
+                <div class="search-trigger-btn" onclick="document.getElementById('globalSearchInput')?.focus()">
+                    <i class="bi bi-search"></i>
+                    <span>Cari barang, SKU, ref...</span>
+                    <span class="shortcut-chip">⌘K</span>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-none d-md-flex align-items-center gap-2 bg-light px-3 py-2 rounded-3 border border-secondary border-opacity-10 text-muted font-mono" style="font-size: 0.82rem;">
+                    <i class="bi bi-clock text-success"></i>
+                    <span>{{ date('d M Y') }}</span>
+                </div>
 
                 @auth
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="text-light text-end me-2">
-                            <div class="fw-semibold">{{ Auth::user()->name }}</div>
-                            @if(Auth::user()->isAdmin())
-                                <span class="badge bg-danger role-badge">Admin</span>
-                            @elseif(Auth::user()->isStaff())
-                                <span class="badge bg-primary role-badge">Staff</span>
-                            @elseif(Auth::user()->isOwner())
-                                <span class="badge bg-success role-badge">Owner</span>
-                            @endif
-                        </div>
-                        <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                            @csrf
-                            <button type="submit" class="btn btn-outline-light btn-sm" title="Keluar">
-                                <i class="bi bi-box-arrow-right me-1"></i> Logout
-                            </button>
-                        </form>
+                    <div class="dropdown">
+                        <button class="btn btn-light btn-sm border d-flex align-items-center gap-2 px-3 py-1 text-dark" type="button" data-bs-toggle="dropdown" style="border-radius: 10px;">
+                            <div class="avatar-box" style="width: 28px; height: 28px; font-size: 0.8rem;">
+                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            </div>
+                            <span class="d-none d-md-inline fw-semibold">{{ Auth::user()->name }}</span>
+                            <i class="bi bi-chevron-down small text-muted"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2">
+                            <li class="px-3 py-2 border-bottom">
+                                <div class="fw-bold text-dark">{{ Auth::user()->name }}</div>
+                                <div class="small text-muted">{{ Auth::user()->email }}</div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2">
+                                        <i class="bi bi-box-arrow-right"></i> Keluar
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
                     </div>
                 @endauth
             </div>
-        </div>
-    </nav>
+        </header>
 
-    <main class="container-fluid px-4 py-4">
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
+        <!-- Main Body View Container -->
+        <main class="p-4">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show border-0 text-dark mb-4 d-flex align-items-center" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3) !important;" role="alert">
+                    <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
+                    <div>{{ session('success') }}</div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show border-0 text-dark mb-4 d-flex align-items-center" style="background: rgba(220, 38, 38, 0.12); border: 1px solid rgba(220, 38, 38, 0.3) !important;" role="alert">
+                    <i class="bi bi-exclamation-octagon-fill text-danger fs-4 me-3"></i>
+                    <div>{{ session('error') }}</div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
-        @if($errors->any())
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-octagon-fill me-2"></i><strong>Terjadi kesalahan input:</strong>
-                <ul class="mb-0 mt-1">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show border-0 text-dark mb-4" style="background: rgba(220, 38, 38, 0.12); border: 1px solid rgba(220, 38, 38, 0.3) !important;" role="alert">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-exclamation-triangle-fill text-danger fs-4 me-2"></i>
+                        <strong class="fs-6">Terjadi kesalahan input:</strong>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+                    </div>
+                    <ul class="mb-0 ps-4 small text-muted">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-        @yield('content')
-    </main>
+            @yield('content')
+        </main>
+    </div>
+</div>
 
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    @stack('scripts')
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Keyboard Shortcut (⌘K / Ctrl+K)
+    document.addEventListener('keydown', function(e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            e.preventDefault();
+            const searchField = document.getElementById('globalSearchInput');
+            if (searchField) searchField.focus();
+        }
+    });
+</script>
+@stack('scripts')
 </body>
 </html>
