@@ -1,9 +1,18 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Stockz Analytics Engine</title>
+
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('stockz_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +23,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <style>
-        :root {
+        :root, [data-theme="light"] {
             --bg-canvas: #f4f6f9;
             --surface-card: #ffffff;
             --brand-emerald: #0f543f;
@@ -23,10 +32,23 @@
             --border-light: #e2e8f0;
             --text-heading: #0f172a;
             --text-body: #334155;
+            --input-bg: #f8fafc;
+        }
+
+        [data-theme="dark"], [data-bs-theme="dark"] {
+            --bg-canvas: #0b0f19;
+            --surface-card: #161e2e;
+            --brand-emerald: #10b981;
+            --brand-emerald-glow: rgba(16, 185, 129, 0.25);
+            --royal-violet: #8b5cf6;
+            --border-light: #2a3447;
+            --text-heading: #f8fafc;
+            --text-body: #cbd5e1;
+            --input-bg: #111827;
         }
 
         body {
-            background: linear-gradient(135deg, #e2e8f0 0%, #f4f6f9 100%);
+            background: var(--bg-canvas);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -34,6 +56,8 @@
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
             color: var(--text-body);
             padding: 1.5rem;
+            position: relative;
+            transition: background-color 0.25s ease, color 0.25s ease;
         }
 
         .login-card {
@@ -114,8 +138,9 @@
         }
 
         .demo-chip {
-            background: #f1f5f9;
+            background: var(--input-bg);
             border: 1px solid var(--border-light);
+            color: var(--text-body);
             border-radius: 8px;
             padding: 6px 10px;
             font-size: 0.75rem;
@@ -124,12 +149,81 @@
         }
 
         .demo-chip:hover {
-            background: #e2e8f0;
+            background: var(--border-light);
             border-color: var(--brand-emerald);
+        }
+
+        /* Theme Toggle Button (Icon Sun & Moon Only) */
+        .theme-toggle-btn {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: var(--surface-card);
+            border: 1px solid var(--border-light);
+            color: var(--text-heading);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+            padding: 0;
+            font-size: 1.2rem;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: var(--brand-emerald);
+            color: var(--brand-emerald);
+            transform: translateY(-2px);
+        }
+
+        .sun-icon {
+            display: none;
+            color: #f59e0b;
+        }
+
+        .moon-icon {
+            display: inline-block;
+            color: #6d28d9;
+        }
+
+        [data-theme="dark"] .sun-icon {
+            display: inline-block;
+        }
+
+        [data-theme="dark"] .moon-icon {
+            display: none;
+        }
+
+        [data-theme="dark"] .text-dark {
+            color: var(--text-heading) !important;
+        }
+
+        [data-theme="dark"] .form-control-light,
+        [data-theme="dark"] .input-group-text-light {
+            background-color: var(--input-bg);
+            border-color: var(--border-light);
+            color: var(--text-heading);
+        }
+
+        [data-theme="dark"] .form-control-light:focus {
+            background-color: var(--input-bg);
+            border-color: var(--brand-emerald);
+            color: var(--text-heading);
         }
     </style>
 </head>
 <body>
+
+    <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Mode Terang / Gelap" aria-label="Toggle Theme">
+        <i class="bi bi-sun-fill sun-icon"></i>
+        <i class="bi bi-moon-stars-fill moon-icon"></i>
+    </button>
 
     <div class="login-card">
         <div class="text-center mb-4">
@@ -201,6 +295,19 @@
             document.getElementById('email').value = email;
             document.getElementById('password').value = 'password';
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeBtn = document.getElementById('themeToggleBtn');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', function() {
+                    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-bs-theme', nextTheme);
+                    document.documentElement.setAttribute('data-theme', nextTheme);
+                    localStorage.setItem('stockz_theme', nextTheme);
+                });
+            }
+        });
     </script>
 </body>
 </html>

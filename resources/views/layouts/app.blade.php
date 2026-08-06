@@ -1,9 +1,18 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Dashboard') - Stockz Command Engine</title>
+    
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('stockz_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
     <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +25,7 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <style>
-        :root {
+        :root, [data-theme="light"] {
             --bg-canvas: #f4f6f9;
             --surface-white: #ffffff;
             --surface-hover: #f8fafc;
@@ -34,6 +43,34 @@
             --border-light: #e2e8f0;
             --border-light-subtle: #f1f5f9;
             --sidebar-width: 270px;
+            --topbar-bg: rgba(255, 255, 255, 0.85);
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            --table-header-bg: #f8fafc;
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"], [data-bs-theme="dark"] {
+            --bg-canvas: #0b0f19;
+            --surface-white: #161e2e;
+            --surface-hover: #1f293d;
+            --brand-emerald: #10b981;
+            --brand-emerald-light: #34d399;
+            --brand-emerald-glow: rgba(16, 185, 129, 0.25);
+            --royal-violet: #8b5cf6;
+            --royal-violet-glow: rgba(139, 92, 246, 0.2);
+            --coral-alert: #ef4444;
+            --coral-glow: rgba(239, 68, 68, 0.2);
+            --amber-warn: #f59e0b;
+            --text-heading: #f8fafc;
+            --text-body: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-light: #2a3447;
+            --border-light-subtle: #1e293b;
+            --sidebar-width: 270px;
+            --topbar-bg: rgba(22, 30, 46, 0.85);
+            --card-shadow: 0 4px 25px rgba(0, 0, 0, 0.35);
+            --table-header-bg: #1e293d;
+            --input-bg: #111827;
         }
 
         body {
@@ -42,6 +79,7 @@
             font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
             overflow-x: hidden;
+            transition: background-color 0.25s ease, color 0.25s ease;
         }
 
         /* Typography */
@@ -382,6 +420,142 @@
             background: #94a3b8;
         }
 
+        /* Theme Toggle Button (Icon Sun & Moon Only) */
+        .theme-toggle-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--surface-white);
+            border: 1px solid var(--border-light);
+            color: var(--text-heading);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+            padding: 0;
+            font-size: 1.15rem;
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--surface-hover);
+            border-color: var(--brand-emerald);
+            color: var(--brand-emerald);
+            transform: translateY(-1px);
+        }
+
+        .sun-icon {
+            display: none;
+            color: #f59e0b;
+        }
+
+        .moon-icon {
+            display: inline-block;
+            color: #6d28d9;
+        }
+
+        [data-theme="dark"] .sun-icon {
+            display: inline-block;
+        }
+
+        [data-theme="dark"] .moon-icon {
+            display: none;
+        }
+
+        /* Dark Theme Overrides for Bootstrap elements & utilities */
+        [data-theme="dark"] .topbar {
+            background: var(--topbar-bg);
+            border-bottom-color: var(--border-light);
+        }
+
+        [data-theme="dark"] .sidebar {
+            background: var(--sidebar-bg);
+            border-right-color: var(--border-light);
+        }
+
+        [data-theme="dark"] .sidebar-user {
+            background: var(--surface-hover);
+            border-top-color: var(--border-light);
+        }
+
+        [data-theme="dark"] .user-card {
+            background: var(--surface-white);
+            border-color: var(--border-light);
+        }
+
+        [data-theme="dark"] .text-dark {
+            color: var(--text-heading) !important;
+        }
+
+        [data-theme="dark"] .bg-white {
+            background-color: var(--surface-white) !important;
+        }
+
+        [data-theme="dark"] .bg-light {
+            background-color: var(--surface-hover) !important;
+        }
+
+        [data-theme="dark"] .card {
+            background-color: var(--surface-white);
+            border-color: var(--border-light);
+            color: var(--text-body);
+        }
+
+        [data-theme="dark"] .card-header,
+        [data-theme="dark"] .card-footer {
+            background-color: var(--surface-white) !important;
+            border-color: var(--border-light) !important;
+        }
+
+        [data-theme="dark"] .dropdown-menu {
+            background-color: var(--surface-white);
+            border-color: var(--border-light);
+            color: var(--text-body);
+        }
+
+        [data-theme="dark"] .dropdown-item {
+            color: var(--text-body);
+        }
+
+        [data-theme="dark"] .dropdown-item:hover {
+            background-color: var(--surface-hover);
+            color: var(--text-heading);
+        }
+
+        [data-theme="dark"] .modal-content {
+            background-color: var(--surface-white);
+            border-color: var(--border-light);
+            color: var(--text-body);
+        }
+
+        [data-theme="dark"] .form-control,
+        [data-theme="dark"] .form-select {
+            background-color: var(--input-bg);
+            border-color: var(--border-light);
+            color: var(--text-heading);
+        }
+
+        [data-theme="dark"] .form-control:focus,
+        [data-theme="dark"] .form-select:focus {
+            background-color: var(--input-bg);
+            border-color: var(--brand-emerald);
+            color: var(--text-heading);
+        }
+
+        [data-theme="dark"] .table-custom thead th {
+            background: var(--table-header-bg);
+            border-bottom-color: var(--border-light);
+        }
+
+        [data-theme="dark"] .table-custom tbody td {
+            border-bottom-color: var(--border-light-subtle);
+        }
+
+        [data-theme="dark"] .table-custom tbody tr:hover td {
+            background: var(--surface-hover);
+        }
+
         /* Mobile Sidebar Overlay */
         @media (max-width: 991.98px) {
             .sidebar {
@@ -528,6 +702,11 @@
             </div>
 
             <div class="d-flex align-items-center gap-3">
+                <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Mode Terang / Gelap" aria-label="Toggle Theme">
+                    <i class="bi bi-sun-fill sun-icon"></i>
+                    <i class="bi bi-moon-stars-fill moon-icon"></i>
+                </button>
+
                 <div class="d-none d-md-flex align-items-center gap-2 bg-light px-3 py-2 rounded-3 border border-secondary border-opacity-10 text-muted font-mono" style="font-size: 0.82rem;">
                     <i class="bi bi-clock text-success"></i>
                     <span>{{ date('d M Y') }}</span>
@@ -609,6 +788,20 @@
             e.preventDefault();
             const searchField = document.getElementById('globalSearchInput');
             if (searchField) searchField.focus();
+        }
+    });
+
+    // Light/Dark Theme Toggle Handler
+    document.addEventListener('DOMContentLoaded', function() {
+        const themeBtn = document.getElementById('themeToggleBtn');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-bs-theme', nextTheme);
+                document.documentElement.setAttribute('data-theme', nextTheme);
+                localStorage.setItem('stockz_theme', nextTheme);
+            });
         }
     });
 </script>
