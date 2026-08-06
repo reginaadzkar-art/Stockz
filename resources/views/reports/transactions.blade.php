@@ -20,7 +20,7 @@
 <div class="row g-3 mb-4">
     <!-- Inflow Card -->
     <div class="col-md-4">
-        <div class="glass-card p-4 h-100 position-relative overflow-hidden" style="background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%); border-color: rgba(16, 185, 129, 0.3);">
+        <div class="glass-card p-4 h-100 position-relative overflow-hidden" style="background: var(--surface-white); border-color: rgba(16, 185, 129, 0.3);">
             <div class="d-flex justify-content-between align-items-start mb-2">
                 <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.8px;">Total Inflow (Barang Masuk)</span>
                 <div class="p-2 rounded-circle" style="background: rgba(16, 185, 129, 0.15); color: #059669;">
@@ -34,7 +34,7 @@
 
     <!-- Outflow Card -->
     <div class="col-md-4">
-        <div class="glass-card p-4 h-100 position-relative overflow-hidden" style="background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%); border-color: rgba(220, 38, 38, 0.3);">
+        <div class="glass-card p-4 h-100 position-relative overflow-hidden" style="background: var(--surface-white); border-color: rgba(220, 38, 38, 0.3);">
             <div class="d-flex justify-content-between align-items-start mb-2">
                 <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.8px;">Total Outflow (Barang Keluar)</span>
                 <div class="p-2 rounded-circle" style="background: rgba(220, 38, 38, 0.15); color: #dc2626;">

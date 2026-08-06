@@ -91,7 +91,7 @@
 <div class="row g-4 mb-4">
     <!-- Owner / Executive Hub Widget (Foto 3 - Light Crextio style) -->
     <div class="col-xl-4 col-lg-5">
-        <div class="glass-card h-100 p-4 d-flex flex-column justify-content-between position-relative overflow-hidden" style="background: linear-gradient(145deg, #ffffff, #fefefe); border: 1px solid #e2e8f0;">
+        <div class="glass-card h-100 p-4 d-flex flex-column justify-content-between position-relative overflow-hidden" style="background: var(--surface-white); border: 1px solid var(--border-light);">
             <div>
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div class="d-flex align-items-center gap-3">
@@ -106,12 +106,12 @@
                     <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1 small">Active</span>
                 </div>
 
-                <div class="my-4 p-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                <div class="my-4 p-3 rounded-3" style="background: var(--surface-hover); border: 1px solid var(--border-light);">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="text-muted small fw-semibold">Indikator Kesehatan Stok</span>
                         <span class="fw-bold text-emerald font-mono">{{ $stockHealthPercentage }}%</span>
                     </div>
-                    <div class="progress" style="height: 10px; background: #e2e8f0; border-radius: 20px;">
+                    <div class="progress" style="height: 10px; background: var(--border-light); border-radius: 20px;">
                         <div class="progress-bar" role="progressbar" style="width: {{ $stockHealthPercentage }}%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 20px;"></div>
                     </div>
                     <div class="d-flex justify-content-between text-muted extra-small mt-2">
