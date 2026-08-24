@@ -227,11 +227,11 @@
 
     <div class="login-card">
         <div class="text-center mb-4">
-            <div class="brand-icon-large">
-                <i class="bi bi-box-seam-fill"></i>
+            <div class="brand-icon-large" style="background: linear-gradient(135deg, #10b981, #047857); color: #fff;">
+                <i class="bi bi-bag-check-fill"></i>
             </div>
-            <h3 class="fw-bold text-dark mb-1">Stockz Engine</h3>
-            <p class="text-muted small">Real-Time Inventory & Financial Analytics</p>
+            <h3 class="fw-bold text-dark mb-1" style="letter-spacing: 0.5px;">BYZEE Inventory</h3>
+            <p class="text-muted small">Real-Time Hijab Stock & Operations Engine</p>
         </div>
 
         @if(session('success'))
@@ -252,7 +252,7 @@
                 <label for="email" class="form-label text-muted small fw-semibold">Email Account</label>
                 <div class="input-group">
                     <span class="input-group-text input-group-text-light"><i class="bi bi-envelope"></i></span>
-                    <input type="email" name="email" id="email" class="form-control form-control-light font-mono" value="{{ old('email', 'admin@stockz.com') }}" required autofocus>
+                    <input type="email" name="email" id="email" class="form-control form-control-light font-mono" value="{{ old('email') }}" placeholder="admin@stockz.com" required autofocus>
                 </div>
             </div>
 
@@ -260,7 +260,7 @@
                 <label for="password" class="form-label text-muted small fw-semibold">Password</label>
                 <div class="input-group">
                     <span class="input-group-text input-group-text-light"><i class="bi bi-lock"></i></span>
-                    <input type="password" name="password" id="password" class="form-control form-control-light font-mono" value="password" required>
+                    <input type="password" name="password" id="password" class="form-control form-control-light font-mono" placeholder="••••••••" required>
                 </div>
             </div>
 
@@ -273,21 +273,6 @@
                 <i class="bi bi-box-arrow-in-right me-1"></i> Masuk Ke System
             </button>
         </form>
-
-        <div class="mt-4 pt-3 border-top">
-            <div class="text-muted extra-small text-center mb-2 fw-semibold">Klik Akses Demo Cepat (Pass: <code class="font-mono text-success">password</code>):</div>
-            <div class="d-flex justify-content-between gap-1">
-                <div class="demo-chip text-dark flex-fill text-center" onclick="fillLogin('admin@stockz.com')">
-                    <span class="text-danger fw-bold">Admin</span>
-                </div>
-                <div class="demo-chip text-dark flex-fill text-center" onclick="fillLogin('staff@stockz.com')">
-                    <span class="text-success fw-bold">Staff</span>
-                </div>
-                <div class="demo-chip text-dark flex-fill text-center" onclick="fillLogin('owner@stockz.com')">
-                    <span style="color: #6d28d9;" class="fw-bold">Owner</span>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>

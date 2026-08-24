@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Default Admin User
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'admin@stockz.com'],
             [
                 'name' => 'Administrator',
@@ -22,7 +22,8 @@ class DatabaseSeeder extends Seeder
                 'role' => 'admin',
             ]
         );
+
+        // Seed Byzee Catalog Products & Variants
+        $this->call(ByzeeProductSeeder::class);
     }
 }
-
-

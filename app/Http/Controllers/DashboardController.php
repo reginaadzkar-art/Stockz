@@ -12,12 +12,24 @@ class DashboardController extends Controller
     public function index()
     {
         $totalItems = Item::count();
-        $lowStockItems = Item::whereColumn('current_stock', '<=', 'min_stock')->get();
+        $lowStockItems = Item::where(function ($q) {
+            $q->whereColumn('current_stock', '<=', 'min_stock')
+              ->orWhereHas('variants', function ($vq) {
+                  $vq->whereColumn('current_stock', '<=', 'min_stock');
+              });
+        })->get();
         $lowStockCount = $lowStockItems->count();
         $stockHealthPercentage = $totalItems > 0 ? round((($totalItems - $lowStockCount) / $totalItems) * 100) : 100;
 
-        $totalValuationPurchase = Item::selectRaw('SUM(current_stock * purchase_price) as total')->value('total') ?? 0;
-        $totalValuationSelling = Item::selectRaw('SUM(current_stock * selling_price) as total')->value('total') ?? 0;
+        $totalValuationPurchase = DB::table('item_variants')->selectRaw('SUM(current_stock * purchase_price) as total')->value('total');
+        if (is_null($totalValuationPurchase)) {
+            $totalValuationPurchase = Item::selectRaw('SUM(current_stock * purchase_price) as total')->value('total') ?? 0;
+        }
+
+        $totalValuationSelling = DB::table('item_variants')->selectRaw('SUM(current_stock * selling_price) as total')->value('total');
+        if (is_null($totalValuationSelling)) {
+            $totalValuationSelling = Item::selectRaw('SUM(current_stock * selling_price) as total')->value('total') ?? 0;
+        }
 
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();

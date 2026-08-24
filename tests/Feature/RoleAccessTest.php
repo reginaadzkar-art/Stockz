@@ -38,4 +38,26 @@ class RoleAccessTest extends TestCase
         $reportResponse = $this->actingAs($owner)->get(route('reports.stock'));
         $reportResponse->assertStatus(200);
     }
+
+    public function test_staff_cannot_see_omset_and_financial_valuations(): void
+    {
+        $staff = User::factory()->create(['role' => 'staff']);
+        $owner = User::factory()->create(['role' => 'owner']);
+
+        // Check Dashboard for Staff
+        $staffDashboard = $this->actingAs($staff)->get(route('dashboard'));
+        $staffDashboard->assertStatus(200);
+        $staffDashboard->assertDontSee('ESTIMASI VALUASI INVENTORY');
+        $staffDashboard->assertSee('DASHBOARD OPERASIONAL STOK');
+
+        // Check Dashboard for Owner
+        $ownerDashboard = $this->actingAs($owner)->get(route('dashboard'));
+        $ownerDashboard->assertStatus(200);
+        $ownerDashboard->assertSee('ESTIMASI VALUASI INVENTORY');
+
+        // Check Stock Movements for Staff
+        $staffMovements = $this->actingAs($staff)->get(route('stock-movements.index'));
+        $staffMovements->assertStatus(200);
+        $staffMovements->assertDontSee('Total Nilai Nominal');
+    }
 }

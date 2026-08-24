@@ -21,7 +21,7 @@ class StockMovementController extends Controller
 
     public function index(Request $request)
     {
-        $query = StockMovement::with(['user', 'supplier', 'details.item']);
+        $query = StockMovement::with(['user', 'supplier', 'details.item', 'details.variant']);
 
         if ($request->filled('type')) {
             $query->where('type', $request->type);
@@ -51,14 +51,14 @@ class StockMovementController extends Controller
 
     public function show(StockMovement $stockMovement)
     {
-        $stockMovement->load(['user', 'supplier', 'details.item.category']);
+        $stockMovement->load(['user', 'supplier', 'details.item.category', 'details.variant']);
         return view('stock_movements.show', compact('stockMovement'));
     }
 
     public function createIn()
     {
         $suppliers = Supplier::orderBy('name')->get();
-        $items = Item::with('category')->orderBy('name')->get();
+        $items = Item::with(['category', 'variants'])->orderBy('name')->get();
 
         return view('stock_movements.create_in', compact('suppliers', 'items'));
     }
@@ -71,6 +71,7 @@ class StockMovementController extends Controller
             'notes' => ['nullable', 'string'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.item_id' => ['required', 'exists:items,id'],
+            'items.*.item_variant_id' => ['nullable', 'exists:item_variants,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.price' => ['required', 'numeric', 'min:0'],
         ]);
@@ -86,7 +87,7 @@ class StockMovementController extends Controller
 
     public function createOut()
     {
-        $items = Item::with('category')->where('current_stock', '>', 0)->orderBy('name')->get();
+        $items = Item::with(['category', 'variants'])->where('current_stock', '>', 0)->orderBy('name')->get();
 
         return view('stock_movements.create_out', compact('items'));
     }
@@ -99,6 +100,7 @@ class StockMovementController extends Controller
             'notes' => ['nullable', 'string'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.item_id' => ['required', 'exists:items,id'],
+            'items.*.item_variant_id' => ['nullable', 'exists:item_variants,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.price' => ['required', 'numeric', 'min:0'],
         ]);

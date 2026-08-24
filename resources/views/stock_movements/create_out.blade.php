@@ -19,7 +19,7 @@
                         </div>
                         <div class="col-md-8">
                             <label for="recipient_or_destination" class="form-label fw-semibold">Penerima / Tujuan / Customer</label>
-                            <input type="text" name="recipient_or_destination" id="recipient_or_destination" class="form-control" value="{{ old('recipient_or_destination') }}" placeholder="Contoh: Toko Maju Jaya / Divisi Operasional" required>
+                            <input type="text" name="recipient_or_destination" id="recipient_or_destination" class="form-control" value="{{ old('recipient_or_destination') }}" placeholder="Contoh: Toko Maju Jaya / Customer Reseller / Pembeli Direct" required>
                         </div>
                     </div>
 
@@ -31,7 +31,7 @@
                     <hr class="my-4">
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold mb-0"><i class="bi bi-list-check me-2"></i>Daftar Barang Keluar:</h6>
+                        <h6 class="fw-bold mb-0"><i class="bi bi-list-check me-2"></i>Daftar Barang & Variasi Keluar:</h6>
                         <button type="button" class="btn btn-sm btn-outline-danger" id="btnAddRow">
                             <i class="bi bi-plus-lg me-1"></i> Tambah Baris Barang
                         </button>
@@ -41,7 +41,7 @@
                         <table class="table table-bordered align-middle" id="itemTable">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 45%;">Pilih Barang (Stok Tersedia)</th>
+                                    <th style="width: 45%;">Pilih Barang & Variasi (Stok Tersedia)</th>
                                     <th style="width: 20%;">Jumlah Keluar (Qty)</th>
                                     <th style="width: 25%;">Harga Jual Satuan (Rp)</th>
                                     <th style="width: 10%;" class="text-center">Aksi</th>
@@ -50,12 +50,23 @@
                             <tbody id="itemTableBody">
                                 <tr class="item-row">
                                     <td>
-                                        <select name="items[0][item_id]" class="form-select select-item" required>
-                                            <option value="">-- Pilih Barang --</option>
+                                        <input type="hidden" name="items[0][item_id]" class="input-item-id">
+                                        <select name="items[0][item_variant_id]" class="form-select select-variant" required>
+                                            <option value="">-- Pilih Barang / Variasi Warna & Ukuran --</option>
                                             @foreach($items as $item)
-                                                <option value="{{ $item->id }}" data-price="{{ $item->selling_price }}" data-stock="{{ $item->current_stock }}">
-                                                    [{{ $item->sku }}] {{ $item->name }} — (Stok Tersedia: {{ $item->current_stock }} {{ $item->unit }})
-                                                </option>
+                                                @if($item->variants->count() > 0)
+                                                    <optgroup label="{{ $item->name }} (SKU: {{ $item->sku }})">
+                                                        @foreach($item->variants as $variant)
+                                                            <option value="{{ $variant->id }}" data-item-id="{{ $item->id }}" data-price="{{ $variant->selling_price }}" data-stock="{{ $variant->current_stock }}">
+                                                                [{{ $variant->sku }}] {{ $item->name }} — [{{ $variant->variant_label }}] (Stok Tersedia: {{ $variant->current_stock }} {{ $item->unit }})
+                                                            </option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                @else
+                                                    <option value="" data-item-id="{{ $item->id }}" data-price="{{ $item->selling_price }}" data-stock="{{ $item->current_stock }}">
+                                                        [{{ $item->sku }}] {{ $item->name }} (Stok Tersedia: {{ $item->current_stock }} {{ $item->unit }})
+                                                    </option>
+                                                @endif
                                             @endforeach
                                         </select>
                                     </td>
@@ -102,15 +113,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     tableBody.addEventListener('change', function(e) {
-        if (e.target.classList.contains('select-item')) {
+        if (e.target.classList.contains('select-variant')) {
             const selectedOption = e.target.options[e.target.selectedIndex];
+            const itemId = selectedOption.getAttribute('data-item-id') || '';
             const price = selectedOption.getAttribute('data-price') || 0;
             const stock = parseInt(selectedOption.getAttribute('data-stock') || 0);
             const row = e.target.closest('tr');
             
+            const itemIdInput = row.querySelector('.input-item-id');
             const priceInput = row.querySelector('.input-price');
             const qtyInput = row.querySelector('.input-qty');
 
+            itemIdInput.value = itemId;
             priceInput.value = price;
             qtyInput.max = stock;
         }
@@ -121,8 +135,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const newRow = firstRow.cloneNode(true);
 
         newRow.querySelectorAll('input, select').forEach(input => {
-            if (input.tagName === 'SELECT') {
+            if (input.classList.contains('input-item-id')) {
                 input.name = `items[${rowIndex}][item_id]`;
+                input.value = '';
+            } else if (input.tagName === 'SELECT') {
+                input.name = `items[${rowIndex}][item_variant_id]`;
                 input.selectedIndex = 0;
             } else if (input.classList.contains('input-qty')) {
                 input.name = `items[${rowIndex}][quantity]`;

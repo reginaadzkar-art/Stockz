@@ -13,6 +13,7 @@ class StockMovementDetail extends Model
     protected $fillable = [
         'stock_movement_id',
         'item_id',
+        'item_variant_id',
         'quantity',
         'price',
         'subtotal',
@@ -32,5 +33,10 @@ class StockMovementDetail extends Model
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
+    }
+
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(ItemVariant::class, 'item_variant_id');
     }
 }

@@ -36,27 +36,51 @@
     <div class="p-4 p-md-5">
         <div class="row align-items-center g-4">
             <div class="col-lg-7">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge px-2 py-1 rounded-2 font-mono" style="background: rgba(255, 255, 255, 0.18); color: #ffffff; font-size: 0.75rem;">
-                        <i class="bi bi-shield-check me-1"></i> ESTIMASI VALUASI INVENTORY
-                    </span>
-                    <span class="text-white opacity-75 small">• Real-time Sync</span>
-                </div>
-                <h1 class="display-5 fw-bold text-white font-mono mb-2">
-                    Rp {{ number_format($totalValuationSelling, 0, ',', '.') }}
-                </h1>
-                <div class="d-flex flex-wrap align-items-center gap-3 text-white opacity-90 small">
-                    <div>
-                        <span class="opacity-75">Nilai Beli Modal:</span>
-                        <strong class="font-mono text-white">Rp {{ number_format($totalValuationPurchase, 0, ',', '.') }}</strong>
+                @if(Auth::user()->isAdmin() || Auth::user()->isOwner())
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge px-2 py-1 rounded-2 font-mono" style="background: rgba(255, 255, 255, 0.18); color: #ffffff; font-size: 0.75rem;">
+                            <i class="bi bi-shield-check me-1"></i> ESTIMASI VALUASI INVENTORY
+                        </span>
+                        <span class="text-white opacity-75 small">• Real-time Sync</span>
                     </div>
-                    <div class="border-start border-white border-opacity-25 pe-2 ps-2">
-                        <span class="opacity-75">Margin Potensial:</span>
-                        <strong class="font-mono" style="color: #6ee7b7;">
-                            +Rp {{ number_format(max(0, $totalValuationSelling - $totalValuationPurchase), 0, ',', '.') }}
-                        </strong>
+                    <h1 class="display-5 fw-bold text-white font-mono mb-2">
+                        Rp {{ number_format($totalValuationSelling, 0, ',', '.') }}
+                    </h1>
+                    <div class="d-flex flex-wrap align-items-center gap-3 text-white opacity-90 small">
+                        <div>
+                            <span class="opacity-75">Nilai Beli Modal:</span>
+                            <strong class="font-mono text-white">Rp {{ number_format($totalValuationPurchase, 0, ',', '.') }}</strong>
+                        </div>
+                        <div class="border-start border-white border-opacity-25 pe-2 ps-2">
+                            <span class="opacity-75">Margin Potensial:</span>
+                            <strong class="font-mono" style="color: #6ee7b7;">
+                                +Rp {{ number_format(max(0, $totalValuationSelling - $totalValuationPurchase), 0, ',', '.') }}
+                            </strong>
+                        </div>
                     </div>
-                </div>
+                @else
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge px-2 py-1 rounded-2 font-mono" style="background: rgba(255, 255, 255, 0.18); color: #ffffff; font-size: 0.75rem;">
+                            <i class="bi bi-boxes me-1"></i> DASHBOARD OPERASIONAL STOK
+                        </span>
+                        <span class="text-white opacity-75 small">• Real-time Sync</span>
+                    </div>
+                    <h1 class="display-5 fw-bold text-white font-mono mb-2">
+                        {{ number_format($totalItems) }} <span class="fs-4 font-sans opacity-75">SKU Barang</span>
+                    </h1>
+                    <div class="d-flex flex-wrap align-items-center gap-3 text-white opacity-90 small">
+                        <div>
+                            <span class="opacity-75">Kesehatan Stok:</span>
+                            <strong class="font-mono text-white">{{ $stockHealthPercentage }}%</strong>
+                        </div>
+                        <div class="border-start border-white border-opacity-25 pe-2 ps-2">
+                            <span class="opacity-75">Stok Menipis:</span>
+                            <strong class="font-mono text-warning">
+                                {{ $lowStockCount }} items
+                            </strong>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <div class="col-lg-5">
@@ -68,7 +92,9 @@
                                 <i class="bi bi-arrow-down-left-circle fs-5" style="color: #6ee7b7;"></i>
                             </div>
                             <div class="fs-4 fw-bold font-mono text-white">+{{ number_format($totalInMonth) }} <span class="fs-6 font-sans opacity-75">pcs</span></div>
-                            <div class="small font-mono mt-1 opacity-90 text-white">Rp {{ number_format($totalIncomeMonth, 0, ',', '.') }}</div>
+                            @if(Auth::user()->isAdmin() || Auth::user()->isOwner())
+                                <div class="small font-mono mt-1 opacity-90 text-white">Rp {{ number_format($totalIncomeMonth, 0, ',', '.') }}</div>
+                            @endif
                         </div>
                     </div>
                     <div class="col-6">
@@ -78,7 +104,9 @@
                                 <i class="bi bi-arrow-up-right-circle fs-5" style="color: #fca5a5;"></i>
                             </div>
                             <div class="fs-4 fw-bold font-mono text-white">-{{ number_format($totalOutMonth) }} <span class="fs-6 font-sans opacity-75">pcs</span></div>
-                            <div class="small font-mono mt-1 opacity-90 text-white">Rp {{ number_format($totalExpenseMonth, 0, ',', '.') }}</div>
+                            @if(Auth::user()->isAdmin() || Auth::user()->isOwner())
+                                <div class="small font-mono mt-1 opacity-90 text-white">Rp {{ number_format($totalExpenseMonth, 0, ',', '.') }}</div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -192,7 +220,11 @@
                         </div>
                     </div>
                     <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
-                        <span class="text-muted small">Nilai: <strong class="font-mono text-dark">Rp {{ number_format($totalIncomeMonth, 0, ',', '.') }}</strong></span>
+                        @if(Auth::user()->isAdmin() || Auth::user()->isOwner())
+                            <span class="text-muted small">Nilai: <strong class="font-mono text-dark">Rp {{ number_format($totalIncomeMonth, 0, ',', '.') }}</strong></span>
+                        @else
+                            <span class="text-muted small"><i class="bi bi-arrow-down-left text-success me-1"></i>Total Qty Masuk</span>
+                        @endif
                         @if(Auth::user()->isAdmin() || Auth::user()->isStaff())
                             <a href="{{ route('stock-movements.in.create') }}" class="text-success small text-decoration-none">+ Input</a>
                         @endif
@@ -213,7 +245,11 @@
                         </div>
                     </div>
                     <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
-                        <span class="text-muted small">Nilai: <strong class="font-mono text-dark">Rp {{ number_format($totalExpenseMonth, 0, ',', '.') }}</strong></span>
+                        @if(Auth::user()->isAdmin() || Auth::user()->isOwner())
+                            <span class="text-muted small">Nilai: <strong class="font-mono text-dark">Rp {{ number_format($totalExpenseMonth, 0, ',', '.') }}</strong></span>
+                        @else
+                            <span class="text-muted small"><i class="bi bi-arrow-up-right text-warning me-1"></i>Total Qty Keluar</span>
+                        @endif
                         @if(Auth::user()->isAdmin() || Auth::user()->isStaff())
                             <a href="{{ route('stock-movements.out.create') }}" class="text-warning small text-decoration-none">- Input</a>
                         @endif

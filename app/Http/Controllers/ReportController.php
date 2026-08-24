@@ -4,49 +4,74 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Item;
+use App\Models\ItemVariant;
 use App\Models\StockMovement;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
     public function stockReport(Request $request)
     {
-        $query = Item::with('category');
+        $query = Item::with(['category', 'variants']);
 
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
 
         if ($request->boolean('low_stock')) {
-            $query->whereColumn('current_stock', '<=', 'min_stock');
+            $query->where(function ($q) {
+                $q->whereColumn('current_stock', '<=', 'min_stock')
+                  ->orWhereHas('variants', function ($vq) {
+                      $vq->whereColumn('current_stock', '<=', 'min_stock');
+                  });
+            });
         }
 
         $items = $query->orderBy('name')->paginate(20)->withQueryString();
         $categories = Category::orderBy('name')->get();
 
-        $totalValuationPurchase = Item::selectRaw('SUM(current_stock * purchase_price) as total')->value('total') ?? 0;
-        $totalValuationSelling = Item::selectRaw('SUM(current_stock * selling_price) as total')->value('total') ?? 0;
-        $lowStockCount = Item::whereColumn('current_stock', '<=', 'min_stock')->count();
+        $totalValuationPurchase = DB::table('item_variants')->selectRaw('SUM(current_stock * purchase_price) as total')->value('total');
+        if (is_null($totalValuationPurchase)) {
+            $totalValuationPurchase = Item::selectRaw('SUM(current_stock * purchase_price) as total')->value('total') ?? 0;
+        }
+
+        $totalValuationSelling = DB::table('item_variants')->selectRaw('SUM(current_stock * selling_price) as total')->value('total');
+        if (is_null($totalValuationSelling)) {
+            $totalValuationSelling = Item::selectRaw('SUM(current_stock * selling_price) as total')->value('total') ?? 0;
+        }
+
+        $lowStockCount = Item::where(function ($q) {
+            $q->whereColumn('current_stock', '<=', 'min_stock')
+              ->orWhereHas('variants', function ($vq) {
+                  $vq->whereColumn('current_stock', '<=', 'min_stock');
+              });
+        })->count();
 
         return view('reports.stock', compact('items', 'categories', 'totalValuationPurchase', 'totalValuationSelling', 'lowStockCount'));
     }
 
     public function exportStockCsv(Request $request): StreamedResponse
     {
-        $query = Item::with('category');
+        $query = Item::with(['category', 'variants']);
 
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
 
         if ($request->boolean('low_stock')) {
-            $query->whereColumn('current_stock', '<=', 'min_stock');
+            $query->where(function ($q) {
+                $q->whereColumn('current_stock', '<=', 'min_stock')
+                  ->orWhereHas('variants', function ($vq) {
+                      $vq->whereColumn('current_stock', '<=', 'min_stock');
+                  });
+            });
         }
 
         $items = $query->orderBy('name')->get();
 
-        $filename = 'Laporan_Stok_Barang_' . date('Ymd_His') . '.csv';
+        $filename = 'Laporan_Stok_Barang_Varian_' . date('Ymd_His') . '.csv';
 
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
@@ -55,24 +80,58 @@ class ReportController extends Controller
 
         $callback = function () use ($items) {
             $file = fopen('php://output', 'w');
-            // Add UTF-8 BOM for Excel compatibility
             fputs($file, "\xEF\xBB\xBF");
 
-            fputcsv($file, ['No', 'Kode SKU', 'Nama Barang', 'Kategori', 'Stok Saat Ini', 'Min. Stok', 'Satuan', 'Harga Beli (Rp)', 'Harga Jual (Rp)', 'Status Stok']);
+            fputcsv($file, [
+                'No',
+                'Kode SKU',
+                'Nama Barang',
+                'Warna',
+                'Ukuran',
+                'Kategori',
+                'Stok Varian',
+                'Min. Stok',
+                'Satuan',
+                'Harga Beli (Rp)',
+                'Harga Jual (Rp)',
+                'Status Stok'
+            ]);
 
-            foreach ($items as $index => $item) {
-                fputcsv($file, [
-                    $index + 1,
-                    $item->sku,
-                    $item->name,
-                    $item->category->name ?? '-',
-                    $item->current_stock,
-                    $item->min_stock,
-                    $item->unit,
-                    $item->purchase_price,
-                    $item->selling_price,
-                    $item->isLowStock() ? 'Stok Menipis' : 'Aman',
-                ]);
+            $rowNo = 1;
+            foreach ($items as $item) {
+                if ($item->variants->count() > 0) {
+                    foreach ($item->variants as $variant) {
+                        fputcsv($file, [
+                            $rowNo++,
+                            $variant->sku,
+                            $item->name,
+                            $variant->color ?? '-',
+                            $variant->size ?? '-',
+                            $item->category->name ?? '-',
+                            $variant->current_stock,
+                            $variant->min_stock,
+                            $item->unit,
+                            $variant->purchase_price,
+                            $variant->selling_price,
+                            $variant->isLowStock() ? 'Stok Menipis' : 'Aman',
+                        ]);
+                    }
+                } else {
+                    fputcsv($file, [
+                        $rowNo++,
+                        $item->sku,
+                        $item->name,
+                        '-',
+                        '-',
+                        $item->category->name ?? '-',
+                        $item->current_stock,
+                        $item->min_stock,
+                        $item->unit,
+                        $item->purchase_price,
+                        $item->selling_price,
+                        $item->isLowStock() ? 'Stok Menipis' : 'Aman',
+                    ]);
+                }
             }
 
             fclose($file);
@@ -83,7 +142,7 @@ class ReportController extends Controller
 
     public function transactionReport(Request $request)
     {
-        $query = StockMovement::with(['user', 'supplier', 'details.item']);
+        $query = StockMovement::with(['user', 'supplier', 'details.item', 'details.variant']);
 
         if ($request->filled('type')) {
             $query->where('type', $request->type);
@@ -97,7 +156,6 @@ class ReportController extends Controller
             $query->whereDate('date', '<=', $request->date_to);
         }
 
-        // Clone query for stats calculations
         $statsQuery = clone $query;
 
         $movements = $query->latest('date')->latest('id')->paginate(20)->withQueryString();
@@ -112,7 +170,7 @@ class ReportController extends Controller
 
     public function exportTransactionsCsv(Request $request): StreamedResponse
     {
-        $query = StockMovement::with(['user', 'supplier', 'details.item']);
+        $query = StockMovement::with(['user', 'supplier', 'details.item', 'details.variant']);
 
         if ($request->filled('type')) {
             $query->where('type', $request->type);

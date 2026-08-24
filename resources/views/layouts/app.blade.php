@@ -751,12 +751,12 @@
     <!-- Sidebar Navigation (Donezo Light Style) -->
     <aside class="sidebar" id="appSidebar">
         <div class="sidebar-brand">
-            <div class="brand-logo-icon">
-                <i class="bi bi-box-seam-fill"></i>
+            <div class="brand-logo-icon" style="background: linear-gradient(135deg, #10b981, #047857); color: #fff;">
+                <i class="bi bi-bag-check-fill"></i>
             </div>
             <div>
-                <div class="brand-title">Stockz</div>
-                <div class="brand-subtitle">Analytics & Inventory</div>
+                <div class="brand-title" style="letter-spacing: 0.5px; font-weight: 800;">BYZEE</div>
+                <div class="brand-subtitle">Hijab & Inventory Engine</div>
             </div>
         </div>
 

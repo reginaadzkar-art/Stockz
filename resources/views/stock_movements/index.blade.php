@@ -74,7 +74,9 @@
                     <th>Tipe</th>
                     <th>Supplier / Recipient</th>
                     <th>Total Qty</th>
-                    <th>Total Nilai Nominal</th>
+                    @if(!Auth::user()->isStaff())
+                        <th>Total Nilai Nominal</th>
+                    @endif
                     <th>Petugas Input</th>
                     <th class="text-end pe-4">Aksi</th>
                 </tr>
@@ -103,7 +105,9 @@
                             @endif
                         </td>
                         <td class="fw-bold font-mono text-white">{{ number_format($movement->total_quantity) }} pcs</td>
-                        <td class="font-mono text-white fw-bold">Rp {{ number_format($movement->total_amount, 0, ',', '.') }}</td>
+                        @if(!Auth::user()->isStaff())
+                            <td class="font-mono text-white fw-bold">Rp {{ number_format($movement->total_amount, 0, ',', '.') }}</td>
+                        @endif
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 <div class="avatar-box" style="width: 26px; height: 26px; font-size: 0.75rem;">
@@ -120,7 +124,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="text-center py-5 text-muted">
+                        <td colspan="{{ Auth::user()->isStaff() ? 7 : 8 }}" class="text-center py-5 text-muted">
                             <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                             Tidak ada data transaksi yang ditemukan.
                         </td>

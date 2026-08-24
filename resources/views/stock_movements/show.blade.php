@@ -54,10 +54,12 @@
                         <td class="text-muted" style="width: 140px;">Total Kuantitas</td>
                         <td class="fw-bold">: {{ number_format($stockMovement->total_quantity) }} unit/item</td>
                     </tr>
-                    <tr>
-                        <td class="text-muted">Total Nilai</td>
-                        <td class="fw-bold text-primary">: Rp {{ number_format($stockMovement->total_amount, 0, ',', '.') }}</td>
-                    </tr>
+                    @if(!Auth::user()->isStaff())
+                        <tr>
+                            <td class="text-muted">Total Nilai</td>
+                            <td class="fw-bold text-primary">: Rp {{ number_format($stockMovement->total_amount, 0, ',', '.') }}</td>
+                        </tr>
+                    @endif
                     <tr>
                         <td class="text-muted">Catatan</td>
                         <td>: {{ $stockMovement->notes ?? '-' }}</td>
@@ -73,31 +75,48 @@
                     <tr>
                         <th>#</th>
                         <th>Kode SKU</th>
-                        <th>Nama Barang</th>
+                        <th>Nama Barang & Varian</th>
                         <th>Kategori</th>
-                        <th class="text-end">Harga Satuan</th>
+                        @if(!Auth::user()->isStaff())
+                            <th class="text-end">Harga Satuan</th>
+                        @endif
                         <th class="text-center">Jumlah</th>
-                        <th class="text-end">Subtotal</th>
+                        @if(!Auth::user()->isStaff())
+                            <th class="text-end">Subtotal</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($stockMovement->details as $detail)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td><code>{{ $detail->item->sku }}</code></td>
-                            <td class="fw-semibold">{{ $detail->item->name }}</td>
-                            <td>{{ $detail->item->category->name }}</td>
-                            <td class="text-end">Rp {{ number_format($detail->price, 0, ',', '.') }}</td>
+                            <td><code>{{ $detail->variant->sku ?? $detail->item->sku }}</code></td>
+                            <td>
+                                <div class="fw-semibold">{{ $detail->item->name }}</div>
+                                @if($detail->variant)
+                                    <span class="badge bg-light text-dark border small me-1">
+                                        <i class="bi bi-tag me-1"></i>{{ $detail->variant->variant_label }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td>{{ $detail->item->category->name ?? '-' }}</td>
+                            @if(!Auth::user()->isStaff())
+                                <td class="text-end">Rp {{ number_format($detail->price, 0, ',', '.') }}</td>
+                            @endif
                             <td class="text-center fw-bold">{{ number_format($detail->quantity) }} {{ $detail->item->unit }}</td>
-                            <td class="text-end fw-bold">Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</td>
+                            @if(!Auth::user()->isStaff())
+                                <td class="text-end fw-bold">Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</td>
+                            @endif
                         </tr>
                     @endforeach
                 </tbody>
                 <tfoot class="table-light fw-bold">
                     <tr>
-                        <td colspan="5" class="text-end">TOTAL</td>
+                        <td colspan="{{ Auth::user()->isStaff() ? 4 : 5 }}" class="text-end">TOTAL</td>
                         <td class="text-center">{{ number_format($stockMovement->total_quantity) }}</td>
-                        <td class="text-end text-primary">Rp {{ number_format($stockMovement->total_amount, 0, ',', '.') }}</td>
+                        @if(!Auth::user()->isStaff())
+                            <td class="text-end text-primary">Rp {{ number_format($stockMovement->total_amount, 0, ',', '.') }}</td>
+                        @endif
                     </tr>
                 </tfoot>
             </table>

@@ -6,17 +6,17 @@
 <!-- Header & Export Action Bar -->
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
-        <h2 class="fw-bold mb-1 text-dark">Laporan Stok & Valuation Assets</h2>
-        <p class="text-muted small mb-0">Analisis ketersediaan barang inventaris, ambang minimum, dan estimasi nilai aset modal (Stakent Asset Hub).</p>
+        <h2 class="fw-bold mb-1 text-dark">Laporan Stok & Valuasi Aset</h2>
+        <p class="text-muted small mb-0">Analisis ketersediaan stok produk & variasi (Warna & Ukuran), ambang minimum, dan total nilai aset modal.</p>
     </div>
     <div>
         <a href="{{ route('reports.stock.export', request()->query()) }}" class="btn btn-emerald fw-bold d-flex align-items-center gap-2 px-3 py-2" style="background: var(--brand-emerald); color: #fff; border-radius: 10px;">
-            <i class="bi bi-file-earmark-arrow-down-fill fs-5"></i> Export Data CSV
+            <i class="bi bi-file-earmark-arrow-down-fill fs-5"></i> Export Data CSV Per Varian
         </a>
     </div>
 </div>
 
-<!-- STAKENT STYLE ASSET METRIC CARDS (Foto 2 Light) -->
+<!-- METRIC CARDS -->
 <div class="row g-3 mb-4">
     <div class="col-md-4">
         <div class="glass-card p-4 h-100">
@@ -25,7 +25,7 @@
                 <i class="bi bi-wallet2 text-success fs-4"></i>
             </div>
             <h3 class="fw-bold text-dark font-mono mb-1">Rp {{ number_format($totalValuationPurchase, 0, ',', '.') }}</h3>
-            <span class="text-muted extra-small">Total nilai aset berdasarkan harga modal beli</span>
+            <span class="text-muted extra-small">Total nilai modal beli dari seluruh stok varian</span>
         </div>
     </div>
     <div class="col-md-4">
@@ -35,22 +35,22 @@
                 <i class="bi bi-graph-up-arrow text-success fs-4"></i>
             </div>
             <h3 class="fw-bold text-success font-mono mb-1">Rp {{ number_format($totalValuationSelling, 0, ',', '.') }}</h3>
-            <span class="text-muted extra-small">Potensi total pendapatan hasil penjualan stok</span>
+            <span class="text-muted extra-small">Potensi total pendapatan hasil penjualan stok varian</span>
         </div>
     </div>
     <div class="col-md-4">
         <div class="glass-card p-4 h-100" style="border-color: {{ $lowStockCount > 0 ? 'rgba(220, 38, 38, 0.4)' : 'var(--border-light)' }};">
             <div class="d-flex justify-content-between align-items-start mb-2">
-                <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.8px;">Item Menipis (Alert)</span>
+                <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.8px;">Produk / Varian Menipis (Alert)</span>
                 <i class="bi bi-exclamation-octagon text-danger fs-4"></i>
             </div>
-            <h3 class="fw-bold text-danger font-mono mb-1">{{ number_format($lowStockCount) }} <span class="fs-6 text-muted font-sans">SKUs</span></h3>
-            <span class="text-muted extra-small">Barang dengan stok kurang dari atau sama dengan batas min.</span>
+            <h3 class="fw-bold text-danger font-mono mb-1">{{ number_format($lowStockCount) }} <span class="fs-6 text-muted font-sans">Produk</span></h3>
+            <span class="text-muted extra-small">Produk dengan varian berkategori stok menipis.</span>
         </div>
     </div>
 </div>
 
-<!-- Filter Panel (Foto 4 Light) -->
+<!-- Filter Panel -->
 <div class="glass-card mb-4 p-4">
     <form action="{{ route('reports.stock') }}" method="GET" class="row g-3 align-items-end">
         <div class="col-md-5">
@@ -88,8 +88,8 @@
 <!-- Asset Table -->
 <div class="glass-card mb-4">
     <div class="glass-card-header">
-        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-boxes text-success me-2"></i>Daftar Ketersediaan Stok Real-Time</h6>
-        <span class="badge bg-light text-dark border font-mono">{{ $items->total() }} Items Found</span>
+        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-boxes text-success me-2"></i>Daftar Ketersediaan Stok Real-Time Per Produk & Varian</h6>
+        <span class="badge bg-light text-dark border font-mono">{{ $items->total() }} Products</span>
     </div>
 
     <div class="table-responsive">
@@ -97,14 +97,12 @@
             <thead>
                 <tr>
                     <th class="ps-4">No</th>
-                    <th>SKU Code</th>
-                    <th>Nama Barang</th>
+                    <th>SKU Utama</th>
+                    <th>Nama Barang & Rincian Variasi (Warna / Ukuran)</th>
                     <th>Kategori</th>
-                    <th>Stok Real-Time</th>
-                    <th>Min. Stok</th>
-                    <th>Harga Beli</th>
+                    <th>Total Stok</th>
                     <th>Harga Jual</th>
-                    <th class="text-end pe-4">Status</th>
+                    <th class="text-end pe-4">Status Stok</th>
                 </tr>
             </thead>
             <tbody>
@@ -116,7 +114,18 @@
                                 {{ $item->sku }}
                             </code>
                         </td>
-                        <td class="fw-semibold text-dark">{{ $item->name }}</td>
+                        <td>
+                            <div class="fw-semibold text-dark">{{ $item->name }}</div>
+                            @if($item->variants->count() > 0)
+                                <div class="mt-1 d-flex flex-wrap gap-1">
+                                    @foreach($item->variants as $variant)
+                                        <span class="badge bg-light text-dark border extra-small">
+                                            {{ $variant->variant_label }}: <strong>{{ $variant->current_stock }}</strong> {{ $item->unit }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </td>
                         <td>
                             <span class="badge bg-light text-dark border px-2 py-1">
                                 {{ $item->category->name }}
@@ -127,9 +136,9 @@
                                 {{ number_format($item->current_stock) }} {{ $item->unit }}
                             </span>
                         </td>
-                        <td class="font-mono text-muted">{{ number_format($item->min_stock) }} {{ $item->unit }}</td>
-                        <td class="font-mono text-muted">Rp {{ number_format($item->purchase_price, 0, ',', '.') }}</td>
-                        <td class="font-mono text-dark fw-semibold">Rp {{ number_format($item->selling_price, 0, ',', '.') }}</td>
+                        <td class="font-mono text-dark fw-semibold">
+                            {{ $item->selling_price_formatted }}
+                        </td>
                         <td class="text-end pe-4">
                             @if($item->isLowStock())
                                 <span class="badge badge-coral"><i class="bi bi-exclamation-triangle me-1"></i> Menipis</span>
@@ -140,7 +149,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="text-center py-5 text-muted">
+                        <td colspan="7" class="text-center py-5 text-muted">
                             <i class="bi bi-search fs-1 d-block mb-2"></i>
                             Tidak ada data barang yang sesuai kriteria filter.
                         </td>
