@@ -6,10 +6,10 @@
 <div class="row justify-content-center">
     <div class="col-md-10">
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-danger text-white py-3">
-                <h5 class="fw-bold mb-0"><i class="bi bi-arrow-up-right-circle me-2"></i>Input Transaksi Barang Keluar (Penjualan / Pengeluaran)</h5>
+            <div class="card-header bg-coral py-3">
+                <h5 class="text-white fw-bold mb-0"><i class="bi bi-arrow-up-right-circle me-2"></i>Input Transaksi Barang Keluar (Penjualan / Pengeluaran)</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body bg-surface text-body">
                 <form action="{{ route('stock-movements.out.store') }}" method="POST" id="formStockOut">
                     @csrf
                     <div class="row mb-3">
@@ -39,7 +39,7 @@
 
                     <div class="table-responsive mb-4">
                         <table class="table table-bordered align-middle" id="itemTable">
-                            <thead class="table-light">
+                            <thead class="bg-surface text-muted">
                                 <tr>
                                     <th style="width: 45%;">Pilih Barang & Variasi (Stok Tersedia)</th>
                                     <th style="width: 20%;">Jumlah Keluar (Qty)</th>

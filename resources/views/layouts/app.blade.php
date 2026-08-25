@@ -89,8 +89,37 @@
             letter-spacing: -0.02em;
         }
 
+        .text-dark {
+            color: var(--text-heading) !important;
+        }
+
         .font-mono {
             font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* UI Utilities */
+        .bg-surface { background-color: var(--surface-white) !important; }
+        .bg-emerald { background-color: var(--brand-emerald) !important; color: #fff !important; }
+        .bg-coral { background-color: var(--coral-alert) !important; color: #fff !important; }
+        .text-emerald { color: var(--brand-emerald-light) !important; }
+        .text-coral { color: var(--coral-alert) !important; }
+        
+        .badge-emerald {
+            background-color: var(--brand-emerald-glow);
+            color: var(--brand-emerald-light);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .badge-coral {
+            background-color: var(--coral-glow);
+            color: var(--coral-alert);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+        }
+
+        .btn-outline-success:hover {
+            background-color: var(--brand-emerald) !important;
+            border-color: var(--brand-emerald) !important;
+            color: #fff !important;
         }
 
         /* Layout Structure */

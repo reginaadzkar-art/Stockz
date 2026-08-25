@@ -45,7 +45,7 @@
         </div>
 
         <div class="col-md-2 d-flex gap-2">
-            <button type="submit" class="btn btn-emerald w-100 font-weight-600" style="background: var(--brand-emerald); color: #000; border-radius: 10px;">
+            <button type="submit" class="btn btn-emerald w-100 font-weight-600" style="background: var(--brand-emerald); color: #fff; border-radius: 10px;">
                 <i class="bi bi-search me-1"></i> Filter
             </button>
             <a href="{{ route('items.index') }}" class="btn btn-outline-secondary" title="Reset" style="border-radius: 10px;">

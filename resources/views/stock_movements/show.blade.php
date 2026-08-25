@@ -7,20 +7,20 @@
     <a href="{{ route('stock-movements.index') }}" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i> Kembali ke Riwayat Transaksi
     </a>
-    <button onclick="window.print()" class="btn btn-outline-dark btn-sm d-print-none">
+    <button onclick="window.print()" class="btn btn-outline-secondary btn-sm d-print-none">
         <i class="bi bi-printer me-1"></i> Cetak Bukti Transaksi
     </button>
 </div>
 
 <div class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+    <div class="card-header bg-surface py-3 d-flex justify-content-between align-items-center">
         <h5 class="fw-bold mb-0">
             Bukti Transaksi: <code>{{ $stockMovement->reference_number }}</code>
         </h5>
         @if($stockMovement->type === 'in')
-            <span class="badge bg-success fs-6"><i class="bi bi-arrow-down-left me-1"></i>BARANG MASUK</span>
+            <span class="badge bg-emerald fs-6"><i class="bi bi-arrow-down-left me-1"></i>BARANG MASUK</span>
         @else
-            <span class="badge bg-danger fs-6"><i class="bi bi-arrow-up-right me-1"></i>BARANG KELUAR</span>
+            <span class="badge bg-coral fs-6"><i class="bi bi-arrow-up-right me-1"></i>BARANG KELUAR</span>
         @endif
     </div>
     <div class="card-body">
@@ -57,7 +57,7 @@
                     @if(!Auth::user()->isStaff())
                         <tr>
                             <td class="text-muted">Total Nilai</td>
-                            <td class="fw-bold text-primary">: Rp {{ number_format($stockMovement->total_amount, 0, ',', '.') }}</td>
+                            <td class="fw-bold">: Rp {{ number_format($stockMovement->total_amount, 0, ',', '.') }}</td>
                         </tr>
                     @endif
                     <tr>
@@ -71,7 +71,7 @@
         <h6 class="fw-bold mb-3">Rincian Barang:</h6>
         <div class="table-responsive">
             <table class="table table-bordered align-middle mb-0">
-                <thead class="table-light">
+                <thead class="bg-surface text-muted">
                     <tr>
                         <th>#</th>
                         <th>Kode SKU</th>
@@ -94,7 +94,7 @@
                             <td>
                                 <div class="fw-semibold">{{ $detail->item->name }}</div>
                                 @if($detail->variant)
-                                    <span class="badge bg-light text-dark border small me-1">
+                                    <span class="badge bg-surface text-body border small me-1">
                                         <i class="bi bi-tag me-1"></i>{{ $detail->variant->variant_label }}
                                     </span>
                                 @endif
@@ -110,12 +110,12 @@
                         </tr>
                     @endforeach
                 </tbody>
-                <tfoot class="table-light fw-bold">
+                <tfoot class="bg-surface text-muted fw-bold">
                     <tr>
                         <td colspan="{{ Auth::user()->isStaff() ? 4 : 5 }}" class="text-end">TOTAL</td>
                         <td class="text-center">{{ number_format($stockMovement->total_quantity) }}</td>
                         @if(!Auth::user()->isStaff())
-                            <td class="text-end text-primary">Rp {{ number_format($stockMovement->total_amount, 0, ',', '.') }}</td>
+                            <td class="text-end text-emerald">Rp {{ number_format($stockMovement->total_amount, 0, ',', '.') }}</td>
                         @endif
                     </tr>
                 </tfoot>
