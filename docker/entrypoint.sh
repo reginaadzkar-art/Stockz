@@ -6,10 +6,12 @@ export PORT="${PORT:-10000}"
 echo "==> Configuring Nginx on PORT: ${PORT}..."
 
 # Replace ${PORT} placeholder in Nginx template
+# In Alpine Linux, HTTP server blocks belong in /etc/nginx/http.d/
 if [ -f /etc/nginx/nginx.conf.template ]; then
-    mkdir -p /etc/nginx/http.d /etc/nginx/conf.d
+    mkdir -p /etc/nginx/http.d
+    rm -f /etc/nginx/conf.d/*.conf /etc/nginx/http.d/*.conf
     envsubst '${PORT}' < /etc/nginx/nginx.conf.template > /etc/nginx/http.d/default.conf
-    cp /etc/nginx/http.d/default.conf /etc/nginx/conf.d/default.conf 2>/dev/null || true
+    nginx -t
 fi
 
 # 2. Setup SQLite database if needed
