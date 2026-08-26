@@ -14,7 +14,30 @@ if [ -f /etc/nginx/nginx.conf.template ]; then
     nginx -t
 fi
 
-# 2. Setup SQLite database if needed
+# 2. Ensure .env exists
+if [ ! -f /var/www/html/.env ]; then
+    if [ -f /var/www/html/.env.example ]; then
+        echo "==> Creating .env from .env.example..."
+        cp /var/www/html/.env.example /var/www/html/.env
+    else
+        touch /var/www/html/.env
+    fi
+fi
+
+# 3. Setup APP_KEY (auto-generate if missing)
+if [ -z "$APP_KEY" ]; then
+    EXISTING_KEY=$(grep -E "^APP_KEY=" /var/www/html/.env 2>/dev/null | cut -d '=' -f2- || true)
+    if [ -z "$EXISTING_KEY" ]; then
+        echo "==> APP_KEY is not set. Generating application key..."
+        php artisan key:generate --force
+        export APP_KEY=$(grep -E "^APP_KEY=" /var/www/html/.env | cut -d '=' -f2-)
+    else
+        export APP_KEY="$EXISTING_KEY"
+    fi
+    echo "==> Application key ready."
+fi
+
+# 4. Setup SQLite database if needed
 if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
     DB_PATH="${DB_DATABASE:-/var/www/html/database/database.sqlite}"
     DB_DIR=$(dirname "$DB_PATH")
@@ -23,11 +46,12 @@ if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
         echo "==> Creating SQLite database file at: $DB_PATH"
         touch "$DB_PATH"
     fi
-    chmod -R 775 "$DB_DIR"
+    chmod -R 777 "$DB_DIR"
     chown -R www-data:www-data "$DB_DIR"
+    chmod 666 "$DB_PATH"
 fi
 
-# 3. Ensure required directories and permissions exist
+# 5. Ensure required storage and cache directories exist with proper permissions
 mkdir -p /var/www/html/storage/framework/sessions \
          /var/www/html/storage/framework/views \
          /var/www/html/storage/framework/cache/data \
@@ -37,28 +61,27 @@ mkdir -p /var/www/html/storage/framework/sessions \
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# 4. Create storage symlink
+# 6. Create storage symlink
 echo "==> Linking storage..."
 php artisan storage:link --force 2>/dev/null || true
 
-# 5. Check APP_KEY
-if [ -z "$APP_KEY" ]; then
-    echo "==> WARNING: APP_KEY is not set! Please configure APP_KEY in Render environment variables."
-fi
-
-# 6. Run database migrations if AUTO_MIGRATE=true or RUN_MIGRATIONS=true
-if [ "${AUTO_MIGRATE:-false}" = "true" ] || [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
+# 7. Run database migrations (enabled by default so tables are always ready)
+if [ "${AUTO_MIGRATE:-true}" != "false" ]; then
     echo "==> Running database migrations..."
-    php artisan migrate --force || echo "==> Migration failed or already up to date."
+    php artisan migrate --force || echo "==> Migration warning/skipped."
 fi
 
-# 7. Run database seeder if AUTO_SEED=true
-if [ "${AUTO_SEED:-false}" = "true" ]; then
+# 8. Run database seeder (seeds default admin user if AUTO_SEED is not explicitly false)
+if [ "${AUTO_SEED:-true}" != "false" ]; then
     echo "==> Running database seeder..."
-    php artisan db:seed --force || echo "==> Seeding completed or skipped."
+    php artisan db:seed --force || echo "==> Seeding warning/skipped."
 fi
 
-# 8. Optimize Laravel caches for production
+# 9. Clear and Optimize Laravel caches
+php artisan config:clear || true
+php artisan route:clear || true
+php artisan view:clear || true
+
 if [ "${APP_ENV:-production}" = "production" ] && [ -n "$APP_KEY" ]; then
     echo "==> Optimizing Laravel cache for production..."
     php artisan config:cache || true
